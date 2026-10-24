@@ -68,6 +68,16 @@ jobs:
                - Si no existe, créalo con `gh issue comment ${{ github.event.issue.number }} --body-file <archivo>`.
                Escribe el cuerpo del comentario en un archivo temporal antes de publicarlo.
 
+            IMPORTANTE sobre el formato: todo lo que comentes debe estar escrito en Markdown
+            compatible con GitHub (GitHub Flavored Markdown) para que se renderice correctamente:
+            - Usa encabezados `##`/`###`, listas con `-`, negritas con `**texto**` y código en línea con backticks.
+            - Usa bloques de código con triple backtick e indica el lenguaje (```js, ```css, ```html).
+            - Usa checklists con `- [ ]` para los criterios de aceptación.
+            - Deja una línea en blanco entre párrafos, encabezados, listas y bloques de código.
+            - Para referenciar código usa `archivo:línea` en backticks o enlaces permanentes de GitHub
+              (`https://github.com/${{ github.repository }}/blob/<sha>/<archivo>#L<línea>`).
+            - No envuelvas el comentario completo en un bloque de código ni escapes los caracteres de Markdown.
+
             Formato del diagnóstico (en español, Markdown):
 
             <!-- claude-issue-triage -->
