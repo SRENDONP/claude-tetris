@@ -19,6 +19,9 @@ const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
 const themeToggle = document.getElementById('theme-toggle');
 const themeText = document.getElementById('theme-text');
+const skinSelect = document.getElementById('skin-select');
+const SKIN_KEY = 'tetris-skin';
+let skin = TetrisSkins.getSkin(TetrisSkins.DEFAULT_SKIN);
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId, generator;
 
@@ -111,20 +114,24 @@ function cssVar(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
 
+// el dibujo de cada bloque lo hace la skin activa (skins.js)
 function drawBlock(context, x, y, colorIndex, size, alpha) {
   if (!colorIndex) return;
-  const color = COLORS[colorIndex];
-  context.globalAlpha = alpha ?? 1;
-  context.fillStyle = color;
-  context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
-  // highlight
-  context.fillStyle = cssVar('--block-shine');
-  context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
-  context.globalAlpha = 1;
+  const color = skin.colors[colorIndex] || COLORS[colorIndex];
+  skin.drawBlock(context, x * size, y * size, size, color, alpha ?? 1, { shine: cssVar('--block-shine') });
+}
+
+// fondo del canvas: el de la skin si lo define, si no el del tema (CSS)
+function clearCanvas(context, c) {
+  const colors = TetrisSkins.boardColors(skin, document.documentElement.dataset.theme);
+  context.clearRect(0, 0, c.width, c.height);
+  context.fillStyle = colors ? colors.bg : cssVar('--board-bg');
+  context.fillRect(0, 0, c.width, c.height);
 }
 
 function drawGrid() {
-  ctx.strokeStyle = cssVar('--grid');
+  const colors = TetrisSkins.boardColors(skin, document.documentElement.dataset.theme);
+  ctx.strokeStyle = colors ? colors.grid : cssVar('--grid');
   ctx.lineWidth = 0.5;
   for (let c = 1; c < COLS; c++) {
     ctx.beginPath();
@@ -141,7 +148,7 @@ function drawGrid() {
 }
 
 function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  clearCanvas(ctx, canvas);
   drawGrid();
 
   // board
@@ -164,7 +171,7 @@ function draw() {
 
 function drawNext() {
   const NB = 30;
-  nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+  clearCanvas(nextCtx, nextCanvas);
   const shape = next.shape;
   const offX = Math.floor((4 - shape[0].length) / 2);
   const offY = Math.floor((4 - shape.length) / 2);
@@ -235,6 +242,8 @@ function init() {
 
 document.addEventListener('keydown', e => {
   if (e.target === themeToggle && e.code === 'Space') e.preventDefault();
+  // con el selector de skin enfocado, las flechas solo cambian la opción
+  if (e.target === skinSelect && e.code !== 'KeyP') return;
   if (e.code === 'KeyP') { togglePause(); return; }
   if (paused || gameOver) return;
   switch (e.code) {
@@ -276,5 +285,25 @@ themeToggle.addEventListener('click', () => {
   themeToggle.blur(); // evita que Espacio (caída) active el botón
 });
 
+function setSkin(id) {
+  skin = TetrisSkins.getSkin(id);
+  skinSelect.value = skin.id;
+  document.documentElement.dataset.skin = skin.id;
+  try { localStorage.setItem(SKIN_KEY, skin.id); } catch (_) { /* sin almacenamiento */ }
+  draw();
+  drawNext();
+}
+
+function loadSkin() {
+  try { return localStorage.getItem(SKIN_KEY); } catch (_) { return null; }
+}
+
+for (const s of TetrisSkins.SKINS) skinSelect.add(new Option(s.name, s.id));
+skinSelect.addEventListener('change', () => {
+  setSkin(skinSelect.value);
+  skinSelect.blur(); // evita que Espacio/flechas sigan cambiando la skin al jugar
+});
+
 init();
 setTheme('dark');
+setSkin(loadSkin());
