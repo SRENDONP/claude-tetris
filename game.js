@@ -21,6 +21,8 @@ const themeToggle = document.getElementById('theme-toggle');
 const themeText = document.getElementById('theme-text');
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId, generator;
+// combo: piezas seguidas que borran líneas; maxCombo: el mejor de la partida
+let combo = 0, maxCombo = 0;
 
 function randomPiece() {
   const type = generator.next();
@@ -54,6 +56,8 @@ function merge() {
 function clearLines() {
   const cleared = clearFullLines(board);
   onLinesCleared(cleared, generator); // un Tetris deja pendiente la pieza 1×1
+  combo = cleared ? combo + 1 : 0;
+  maxCombo = Math.max(maxCombo, combo);
   if (cleared) {
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
@@ -179,6 +183,7 @@ function endGame() {
   overlayTitle.textContent = 'GAME OVER';
   overlayScore.textContent = `Puntuación: ${score.toLocaleString()}`;
   overlay.classList.remove('hidden');
+  RecordsUI.showGameOver({ score, lines, combo: maxCombo }); // con el overlay ya visible para enfocar el nombre
 }
 
 function togglePause() {
@@ -219,6 +224,8 @@ function init() {
   score = 0;
   lines = 0;
   level = 1;
+  combo = 0;
+  maxCombo = 0;
   paused = false;
   gameOver = false;
   dropInterval = 1000;
@@ -228,12 +235,15 @@ function init() {
   next = randomPiece();
   spawn();
   updateHUD();
+  RecordsUI.hideGameOver();
   overlay.classList.add('hidden');
   cancelAnimationFrame(animId);
   animId = requestAnimationFrame(loop);
 }
 
 document.addEventListener('keydown', e => {
+  // escribiendo el nombre o usando los botones de la tabla de records
+  if (e.target instanceof Element && e.target.closest('input, .records')) return;
   if (e.target === themeToggle && e.code === 'Space') e.preventDefault();
   if (e.code === 'KeyP') { togglePause(); return; }
   if (paused || gameOver) return;
@@ -267,6 +277,7 @@ function setTheme(theme) {
   themeToggle.setAttribute('aria-checked', String(light));
   themeText.textContent = light ? 'Claro' : 'Oscuro';
   // repintar: si el juego está en pausa o terminado el bucle no lo hace
+  if (!current) return; // aún en la pantalla de inicio
   draw();
   drawNext();
 }
@@ -276,5 +287,6 @@ themeToggle.addEventListener('click', () => {
   themeToggle.blur(); // evita que Espacio (caída) active el botón
 });
 
-init();
+gameOver = true; // ninguna tecla de juego hasta pulsar Jugar
 setTheme('dark');
+RecordsUI.showStart(init);

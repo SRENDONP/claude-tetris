@@ -57,12 +57,24 @@
       <div class="overlay-box">
         <p id="overlay-title">GAME OVER</p>
         <p id="overlay-score"></p>
+        <div id="gameover-records" class="records"></div>
         <button id="restart-btn">Reiniciar</button>
+      </div>
+    </div>
+
+    <!-- pantalla de inicio con la tabla de records -->
+    <div id="start-overlay" class="overlay">
+      <div class="overlay-box">
+        <p class="start-title">RECORDS</p>
+        <div id="start-records" class="records"></div>
+        <button id="play-btn" type="button">Jugar</button>
       </div>
     </div>
   </div>
 
   <script src="tetris-core.js"></script>
+  <script src="records.js"></script>
+  <script src="records-ui.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
