@@ -25,6 +25,8 @@ const SKIN_KEY = 'tetris-skin';
 let skin = TetrisSkins.getSkin(TetrisSkins.DEFAULT_SKIN);
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId, generator;
+// combo: piezas seguidas que borran líneas; maxCombo: el mejor de la partida
+let combo = 0, maxCombo = 0;
 
 function randomPiece() {
   const type = generator.next();
@@ -58,6 +60,8 @@ function merge() {
 function clearLines() {
   const cleared = clearFullLines(board);
   onLinesCleared(cleared, generator); // un Tetris deja pendiente la pieza 1×1
+  combo = cleared ? combo + 1 : 0;
+  maxCombo = Math.max(maxCombo, combo);
   if (cleared) {
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
@@ -187,6 +191,7 @@ function endGame() {
   overlayTitle.textContent = 'GAME OVER';
   overlayScore.textContent = `Puntuación: ${score.toLocaleString()}`;
   overlay.classList.remove('hidden');
+  RecordsUI.showGameOver({ score, lines, combo: maxCombo }); // con el overlay ya visible para enfocar el nombre
 }
 
 // ---- Menú de pausa ----
@@ -329,6 +334,8 @@ function init() {
   lines = 0;
   gameStartLevel = startLevel;
   level = gameStartLevel;
+  combo = 0;
+  maxCombo = 0;
   paused = false;
   gameOver = false;
   hidePauseMenu();
@@ -341,6 +348,7 @@ function init() {
   next = randomPiece();
   spawn();
   updateHUD();
+  RecordsUI.hideGameOver();
   overlay.classList.add('hidden');
   cancelAnimationFrame(animId);
   animId = requestAnimationFrame(loop);
@@ -348,6 +356,8 @@ function init() {
 
 document.addEventListener('keydown', e => {
   pressedKeys.add(e.code);
+  // escribiendo el nombre o usando los botones de la tabla de records
+  if (e.target instanceof Element && e.target.closest('input, .records')) return;
   if (e.target === themeToggle && e.code === 'Space') e.preventDefault();
   // con el selector de skin enfocado, las flechas solo cambian la opción
   if (e.target === skinSelect && e.code !== 'KeyP' && e.code !== 'Escape') return;
@@ -397,6 +407,7 @@ function setTheme(theme) {
   themeToggle.setAttribute('aria-checked', String(light));
   themeText.textContent = light ? 'Claro' : 'Oscuro';
   // repintar: si el juego está en pausa o terminado el bucle no lo hace
+  if (!current) return; // aún en la pantalla de inicio
   draw();
   drawNext();
 }
@@ -411,6 +422,7 @@ function setSkin(id) {
   skinSelect.value = skin.id;
   document.documentElement.dataset.skin = skin.id;
   try { localStorage.setItem(SKIN_KEY, skin.id); } catch (_) { /* sin almacenamiento */ }
+  if (!current) return; // aún en la pantalla de inicio
   draw();
   drawNext();
 }
@@ -425,6 +437,7 @@ skinSelect.addEventListener('change', () => {
   skinSelect.blur(); // evita que Espacio/flechas sigan cambiando la skin al jugar
 });
 
-init();
+gameOver = true; // ninguna tecla de juego hasta pulsar Jugar
 setTheme('dark');
 setSkin(loadSkin());
+RecordsUI.showStart(init);

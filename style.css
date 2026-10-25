@@ -370,3 +370,144 @@ kbd {
   font-size: 13px;
   color: var(--muted);
 }
+/* ---- Tabla de records ---- */
+.start-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: var(--accent);
+}
+
+.records {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.records:empty {
+  display: none;
+}
+
+.records-table {
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 240px;
+}
+
+.records-table th {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--label);
+  font-weight: 600;
+  padding: 4px 8px;
+}
+
+.records-table td {
+  font-family: 'Courier New', Courier, monospace;
+  padding: 4px 8px;
+  border-top: 1px solid var(--board-border);
+}
+
+.records-table td:nth-child(3),
+.records-table td:nth-child(4) {
+  text-align: right;
+}
+
+.record-name {
+  text-align: left;
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.records-table tr.record-new td {
+  color: var(--btn-text);
+  background: var(--accent);
+  font-weight: 700;
+}
+
+.records-empty,
+.records-stats {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.records-stats strong {
+  color: var(--accent);
+}
+
+.record-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.record-msg {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.record-form-row {
+  display: flex;
+  gap: 6px;
+}
+
+.record-input {
+  width: 140px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--kbd-border);
+  background: var(--kbd-bg);
+  color: var(--text);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px;
+  user-select: text;
+}
+
+.record-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.records-btn {
+  background: none;
+  border: 1px solid var(--kbd-border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.records-btn:hover {
+  border-color: var(--accent);
+}
+
+.records-reset {
+  color: var(--danger);
+  font-size: 11px;
+  padding: 4px 10px;
+}
+
+#play-btn {
+  margin-top: 8px;
+  background: var(--accent);
+  color: var(--btn-text);
+  border: none;
+  border-radius: 6px;
+  padding: 10px 28px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: background 0.15s;
+}
+
+#play-btn:hover {
+  background: var(--accent-hover);
+}
