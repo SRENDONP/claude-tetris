@@ -134,7 +134,29 @@
     };
   }
 
+  // Nivel inicial elegible en el menú de pausa.
+  const MIN_START_LEVEL = 1;
+  const MAX_START_LEVEL = 10;
+
+  // Normaliza un nivel inicial cualquiera (texto, NaN, fuera de rango) a 1..10.
+  function clampStartLevel(value) {
+    const n = Math.floor(Number(value));
+    if (!Number.isFinite(n)) return MIN_START_LEVEL;
+    return Math.min(MAX_START_LEVEL, Math.max(MIN_START_LEVEL, n));
+  }
+
+  // Se sube un nivel cada 10 líneas, partiendo del nivel inicial elegido.
+  function levelFor(lines, startLevel = 1) {
+    return clampStartLevel(startLevel) + Math.floor(lines / 10);
+  }
+
+  // Milisegundos entre caídas automáticas para un nivel (mínimo 100).
+  function dropIntervalFor(level) {
+    return Math.max(100, 1000 - (level - 1) * 90);
+  }
+
   return {
+    MIN_START_LEVEL, MAX_START_LEVEL, clampStartLevel, levelFor, dropIntervalFor,
     COLS, ROWS, PIECE_DEFS, SPAWN_CONFIG, COLORS, PIECES, TYPE,
     createBoard, collide, rotateCW, clearFullLines, onLinesCleared, createGenerator,
   };
