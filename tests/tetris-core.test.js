@@ -248,3 +248,41 @@ describe('generador', () => {
     }
   });
 });
+
+describe('nivel inicial y velocidad', () => {
+  const { levelFor, dropIntervalFor, clampStartLevel, MIN_START_LEVEL, MAX_START_LEVEL } = core;
+
+  test('levelFor parte del nivel inicial y sube cada 10 líneas', () => {
+    assert.equal(levelFor(0), 1);
+    assert.equal(levelFor(9), 1);
+    assert.equal(levelFor(10), 2);
+    assert.equal(levelFor(0, 5), 5);
+    assert.equal(levelFor(9, 5), 5);
+    assert.equal(levelFor(19, 5), 6);
+    assert.equal(levelFor(20, 5), 7);
+  });
+
+  test('clampStartLevel limita el nivel inicial a 1..10', () => {
+    assert.equal(MIN_START_LEVEL, 1);
+    assert.equal(MAX_START_LEVEL, 10);
+    assert.equal(clampStartLevel(0), 1);
+    assert.equal(clampStartLevel(-3), 1);
+    assert.equal(clampStartLevel(11), 10);
+    assert.equal(clampStartLevel('7'), 7);
+    assert.equal(clampStartLevel('abc'), 1);
+    assert.equal(clampStartLevel(null), 1);
+    assert.equal(clampStartLevel(3.9), 3);
+  });
+
+  test('dropIntervalFor mantiene la fórmula original con mínimo de 100 ms', () => {
+    assert.equal(dropIntervalFor(1), 1000);
+    assert.equal(dropIntervalFor(2), 910);
+    assert.equal(dropIntervalFor(10), 190);
+    assert.equal(dropIntervalFor(11), 100);
+    assert.equal(dropIntervalFor(50), 100);
+  });
+
+  test('un nivel inicial más alto cae más rápido', () => {
+    assert.ok(dropIntervalFor(levelFor(0, 5)) < dropIntervalFor(levelFor(0, 1)));
+  });
+});
