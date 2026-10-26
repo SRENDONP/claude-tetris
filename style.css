@@ -40,6 +40,28 @@
   --block-shine: rgba(255, 255, 255, 0.35);
 }
 
+/* Neon: fondo negro siempre, independientemente del tema claro/oscuro */
+:root[data-skin="neon"] {
+  --bg: #000000;
+  --text: #e0f7ff;
+  --accent: #00f0ff;
+  --accent-glow: rgba(0, 240, 255, 0.7);
+  --accent-hover: #6ff7ff;
+  --board-bg: #000000;
+  --board-border: #00f0ff55;
+  --board-shadow: rgba(0, 240, 255, 0.25);
+  --grid: #0b1620;
+  --label: #5a7a8c;
+  --muted: #8fb3c4;
+  --kbd-bg: #06121a;
+  --kbd-border: #00f0ff44;
+  --kbd-text: #9fe9f5;
+  --overlay-bg: rgba(0, 0, 0, 0.8);
+  --danger: #ff1744;
+  --btn-text: #000000;
+  --block-shine: rgba(255, 255, 255, 0.12);
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -163,6 +185,23 @@ body {
 }
 
 .theme-toggle:focus-visible .theme-switch {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---- Selector de skin ---- */
+.skin-select {
+  background: var(--kbd-bg);
+  border: 1px solid var(--kbd-border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px;
+  padding: 4px 6px;
+  cursor: pointer;
+}
+
+.skin-select:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
