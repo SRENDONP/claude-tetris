@@ -100,6 +100,24 @@
     return false;
   }
 
+  const MAX_START_LEVEL = 10;
+
+  // Nivel según las líneas borradas: se sube uno cada 10 desde el inicial.
+  function levelForLines(lines, startLevel = 1) {
+    return startLevel + Math.floor(lines / 10);
+  }
+
+  // Milisegundos entre caídas automáticas; nunca baja de 100.
+  function dropIntervalForLevel(level) {
+    return Math.max(100, 1000 - (level - 1) * 90);
+  }
+
+  function clampStartLevel(level) {
+    const n = Math.round(Number(level));
+    if (!Number.isFinite(n)) return 1;
+    return Math.min(MAX_START_LEVEL, Math.max(1, n));
+  }
+
   function createGenerator(rng = Math.random, config = SPAWN_CONFIG) {
     const pool = Object.entries(config.weights)
       .filter(([, w]) => w > 0)
@@ -137,5 +155,6 @@
   return {
     COLS, ROWS, PIECE_DEFS, SPAWN_CONFIG, COLORS, PIECES, TYPE,
     createBoard, collide, rotateCW, clearFullLines, onLinesCleared, createGenerator,
+    MAX_START_LEVEL, levelForLines, dropIntervalForLevel, clampStartLevel,
   };
 });

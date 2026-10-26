@@ -248,3 +248,31 @@ describe('generador', () => {
     }
   });
 });
+
+describe('nivel inicial', () => {
+  const { levelForLines, dropIntervalForLevel, clampStartLevel, MAX_START_LEVEL } = core;
+
+  test('el nivel parte del inicial y sube cada 10 líneas', () => {
+    assert.equal(levelForLines(0), 1);
+    assert.equal(levelForLines(9), 1);
+    assert.equal(levelForLines(10), 2);
+    assert.equal(levelForLines(0, 5), 5);
+    assert.equal(levelForLines(25, 5), 7);
+  });
+
+  test('la velocidad depende del nivel y tiene un mínimo de 100 ms', () => {
+    assert.equal(dropIntervalForLevel(1), 1000);
+    assert.equal(dropIntervalForLevel(5), 640);
+    assert.equal(dropIntervalForLevel(11), 100);
+    assert.equal(dropIntervalForLevel(30), 100);
+  });
+
+  test('clampStartLevel limita el nivel al rango permitido', () => {
+    assert.equal(clampStartLevel(0), 1);
+    assert.equal(clampStartLevel(4), 4);
+    assert.equal(clampStartLevel('7'), 7);
+    assert.equal(clampStartLevel(99), MAX_START_LEVEL);
+    assert.equal(clampStartLevel('abc'), 1);
+    assert.equal(clampStartLevel(null), 1);
+  });
+});
