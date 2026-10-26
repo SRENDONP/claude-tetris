@@ -1,7 +1,7 @@
 'use strict';
 
 // piezas, colisiones, rotación, borrado de líneas y generador: tetris-core.js
-const { COLS, ROWS, COLORS, PIECES, createBoard, rotateCW, clearFullLines, onLinesCleared, createGenerator } = TetrisCore;
+const { COLS, ROWS, PIECES, createBoard, rotateCW, clearFullLines, onLinesCleared, createGenerator } = TetrisCore;
 const BLOCK = 30;
 
 const LINE_SCORES = [0, 100, 300, 500, 800];
@@ -19,6 +19,10 @@ const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
 const themeToggle = document.getElementById('theme-toggle');
 const themeText = document.getElementById('theme-text');
+const skinSelect = document.getElementById('skin-select');
+
+const SKIN_KEY = 'tetris-skin';
+let skin, skinColors;
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId, generator;
 
@@ -111,15 +115,10 @@ function cssVar(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
 
-function drawBlock(context, x, y, colorIndex, size, alpha) {
+function drawBlock(context, x, y, colorIndex, size, alpha, opts) {
   if (!colorIndex) return;
-  const color = COLORS[colorIndex];
   context.globalAlpha = alpha ?? 1;
-  context.fillStyle = color;
-  context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
-  // highlight
-  context.fillStyle = cssVar('--block-shine');
-  context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
+  skin.draw(context, x * size, y * size, size, skinColors[colorIndex], opts);
   context.globalAlpha = 1;
 }
 
@@ -143,34 +142,36 @@ function drawGrid() {
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawGrid();
+  const opts = { shine: cssVar('--block-shine') };
 
   // board
   for (let r = 0; r < ROWS; r++)
     for (let c = 0; c < COLS; c++)
-      drawBlock(ctx, c, r, board[r][c], BLOCK);
+      drawBlock(ctx, c, r, board[r][c], BLOCK, 1, opts);
 
   // ghost
   const gy = ghostY();
   for (let r = 0; r < current.shape.length; r++)
     for (let c = 0; c < current.shape[r].length; c++)
       if (current.shape[r][c])
-        drawBlock(ctx, current.x + c, gy + r, current.shape[r][c], BLOCK, 0.2);
+        drawBlock(ctx, current.x + c, gy + r, current.shape[r][c], BLOCK, 0.2, opts);
 
   // current piece
   for (let r = 0; r < current.shape.length; r++)
     for (let c = 0; c < current.shape[r].length; c++)
-      drawBlock(ctx, current.x + c, current.y + r, current.shape[r][c], BLOCK);
+      drawBlock(ctx, current.x + c, current.y + r, current.shape[r][c], BLOCK, 1, opts);
 }
 
 function drawNext() {
   const NB = 30;
   nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+  const opts = { shine: cssVar('--block-shine') };
   const shape = next.shape;
   const offX = Math.floor((4 - shape[0].length) / 2);
   const offY = Math.floor((4 - shape.length) / 2);
   for (let r = 0; r < shape.length; r++)
     for (let c = 0; c < shape[r].length; c++)
-      drawBlock(nextCtx, offX + c, offY + r, shape[r][c], NB);
+      drawBlock(nextCtx, offX + c, offY + r, shape[r][c], NB, 1, opts);
 }
 
 function endGame() {
@@ -235,6 +236,7 @@ function init() {
 
 document.addEventListener('keydown', e => {
   if (e.target === themeToggle && e.code === 'Space') e.preventDefault();
+  if (e.target === skinSelect) return; // las flechas cambian la opción, no mueven la pieza
   if (e.code === 'KeyP') { togglePause(); return; }
   if (paused || gameOver) return;
   switch (e.code) {
@@ -276,5 +278,27 @@ themeToggle.addEventListener('click', () => {
   themeToggle.blur(); // evita que Espacio (caída) active el botón
 });
 
+function setSkin(name) {
+  name = TetrisSkins.resolveSkinName(name);
+  skin = TetrisSkins.getSkin(name);
+  skinColors = TetrisSkins.colorsFor(skin);
+  document.documentElement.dataset.skin = name;
+  skinSelect.value = name;
+  try { localStorage.setItem(SKIN_KEY, name); } catch {}
+  if (current) { draw(); drawNext(); }
+}
+
+function loadSkin() {
+  try { return localStorage.getItem(SKIN_KEY); } catch { return null; }
+}
+
+for (const [name, s] of Object.entries(TetrisSkins.SKINS)) skinSelect.add(new Option(s.label, name));
+
+skinSelect.addEventListener('change', () => {
+  setSkin(skinSelect.value);
+  skinSelect.blur(); // devuelve el teclado al juego
+});
+
+setSkin(loadSkin());
 init();
 setTheme('dark');

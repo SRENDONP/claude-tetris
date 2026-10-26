@@ -42,6 +42,7 @@ Es una versión jugable del Tetris clásico con todas las mecánicas que esperar
 - **Sistema de puntuación** clásico de Tetris (100 / 300 / 500 / 800 multiplicado por nivel).
 - **Niveles** que aumentan cada 10 líneas y aceleran la caída.
 - **Pausa** y **Game Over** con opción de reinicio.
+- **Skins** visuales (Retro, Neon, Pastel, Pixel art) seleccionables desde el panel; la elección se guarda en `localStorage` y se aplica sin recargar.
 
 ---
 
@@ -159,6 +160,7 @@ Cuando una pieza recién generada ya colisiona al aparecer (`spawn`), se dispara
 ├── index.html      # Estructura del DOM y canvas
 ├── style.css       # Estilos del juego (dark theme)
 ├── game.js         # Toda la lógica del Tetris (~300 líneas)
+├── skins.js        # Skins: paleta y función de dibujo de bloque
 └── README.md
 ```
 
@@ -176,6 +178,8 @@ Algunos parámetros fáciles de tunear en `game.js`:
 | `COLORS`       | Paleta de colores por tipo de pieza      | 7 colores             |
 | `LINE_SCORES`  | Puntos por 1, 2, 3 o 4 líneas eliminadas | `[0,100,300,500,800]` |
 | `dropInterval` | Velocidad inicial de caída en ms         | `1000`                |
+
+Para crear una **skin** nueva basta con añadir una entrada a `SKINS` en `skins.js` con `label`, `palette` (color `#rrggbb` por nombre de pieza; las que falten usan el color de `tetris-core.js`) y `draw(ctx, x, y, size, color, opts)`. Aparece automáticamente en el selector. Si necesita cambiar los colores de la página, añade un bloque `:root[data-skin="<nombre>"]` en `style.css` (como hace Neon).
 
 > Si cambias `COLS`, `ROWS` o `BLOCK`, recuerda ajustar también `width` y `height` del `<canvas id="board">` en `index.html` para que coincida (`COLS × BLOCK` × `ROWS × BLOCK`).
 
